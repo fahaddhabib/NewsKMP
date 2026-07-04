@@ -6,7 +6,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import com.example.newskmp.data.model.Article
+import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun App() {
@@ -16,17 +16,19 @@ fun App() {
                 .fillMaxSize()
                 .safeDrawingPadding()
         ) {
-            var selectedArticle by remember { mutableStateOf<Article?>(null) }
+            val appViewModel = koinViewModel<AppViewModel>(
 
-            if (selectedArticle != null) {
+            )
+
+            if (appViewModel.selectedArticle != null) {
                 ArticleDetailScreen(
-                    article = selectedArticle!!,
-                    onBackClick = { selectedArticle = null }
+                    article = appViewModel.selectedArticle!!,
+                    onBackClick = { appViewModel.clearArticle() }
                 )
             } else {
                 NewsListScreen(
                     onArticleClick = { article ->
-                        selectedArticle = article
+                        appViewModel.selectArticle(article)
                     }
                 )
             }

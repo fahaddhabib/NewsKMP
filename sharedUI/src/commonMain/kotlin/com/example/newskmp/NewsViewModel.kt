@@ -3,7 +3,7 @@ package com.example.newskmp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.newskmp.data.model.Article
-import com.example.newskmp.data.repository.NewsRepositoryImpl
+import com.example.newskmp.data.repository.NewsRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -16,11 +16,10 @@ data class NewsUiState(
     val selectedSection: String = "home"
 )
 
-class NewsViewModel : ViewModel() {
+class NewsViewModel(
+    private val repository: NewsRepository
+) : ViewModel() {
 
-    private val repository = NewsRepositoryImpl()
-
-    // Cache — har section ka data store karo
     private val cache = mutableMapOf<String, List<Article>>()
 
     private val _uiState = MutableStateFlow(NewsUiState())
@@ -31,11 +30,9 @@ class NewsViewModel : ViewModel() {
     }
 
     fun loadNews(section: String) {
-        // Same section par dobara mat load karo
         if (section == _uiState.value.selectedSection &&
             _uiState.value.articles.isNotEmpty()) return
 
-        // Cache mein hai toh seedha show karo — no loading
         cache[section]?.let { cached ->
             _uiState.value = _uiState.value.copy(
                 articles = cached,
@@ -46,7 +43,6 @@ class NewsViewModel : ViewModel() {
             return
         }
 
-        // Cache mein nahi — API call karo
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(
                 isLoading = true,
@@ -55,7 +51,7 @@ class NewsViewModel : ViewModel() {
             )
             try {
                 val articles = repository.getTopStories(section)
-                cache[section] = articles // cache mein save karo
+                cache[section] = articles
                 _uiState.value = _uiState.value.copy(
                     articles = articles,
                     isLoading = false

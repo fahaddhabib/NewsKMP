@@ -34,6 +34,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil3.compose.AsyncImage
 import com.example.newskmp.data.model.Article
 import com.example.newskmp.utils.getThumbnailUrl
+import org.koin.compose.viewmodel.koinViewModel
 
 val sections = listOf(
     "home", "technology", "world", "business",
@@ -42,7 +43,7 @@ val sections = listOf(
 @Composable
 fun NewsListScreen(
     onArticleClick: (Article) -> Unit,
-    viewModel: NewsViewModel = viewModel()
+    viewModel: NewsViewModel = koinViewModel()
 ){
     val uiState by viewModel.uiState.collectAsState()
 
