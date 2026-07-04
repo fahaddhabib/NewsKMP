@@ -23,6 +23,7 @@ A modern News application built with **Kotlin Multiplatform (KMP)** targeting An
 | Networking | Ktor Client |
 | Serialization | Kotlinx Serialization |
 | Image Loading | Coil 3 |
+| Dependency Injection | Koin |
 | UI — Android | Jetpack Compose |
 | UI — iOS | SwiftUI |
 | State Management | StateFlow + ViewModel (AAC) |
@@ -36,15 +37,19 @@ NewsKMP/
 │           ├── model/
 │           ├── remote/
 │           ├── repository/
+│           ├── di/
 │           └── utils/
 ├── sharedUI/
 │   └── commonMain/
+│       ├── di/
 │       ├── NewsListScreen.kt
 │       ├── ArticleDetailScreen.kt
 │       ├── NewsViewModel.kt
+│       ├── AppViewModel.kt
 │       └── App.kt
 ├── androidApp/
-│   └── MainActivity.kt
+│   ├── MainActivity.kt
+│   └── NewsApplication.kt
 └── iosApp/
 └── ContentView.swift
 
@@ -58,6 +63,18 @@ Repository (NewsRepositoryImpl)
 ApiService (ApiServiceImpl + Ktor Client)
 ↓
 NYT Top Stories API
+
+## Dependency Injection
+
+This project uses **Koin** for dependency injection on Android.
+
+| Module | Contents |
+|---|---|
+| `networkModule` | `ApiServiceImpl` bound to `ApiService` |
+| `repositoryModule` | `NewsRepositoryImpl` bound to `NewsRepository` |
+| `viewModelModule` | `NewsViewModel`, `AppViewModel` |
+
+Koin is initialized in `NewsApplication.kt` and all modules are registered at app startup. iOS uses manual DI via SwiftUI's native state management.
 
 ## Getting Started
 
@@ -122,8 +139,8 @@ Select a simulator and click **Run**.
 This is a Kotlin Multiplatform project targeting Android and iOS.
 
 - **[/iosApp](./iosApp/iosApp)** — iOS application entry point with SwiftUI code.
-- **[/sharedLogic](./sharedLogic/src)** — Shared business logic. [commonMain](./sharedLogic/src/commonMain/kotlin) contains networking, models, and repository logic.
-- **[/sharedUI](./sharedUI/src)** — Shared Compose UI. [commonMain](./sharedUI/src/commonMain/kotlin) contains common UI for all targets. Platform-specific folders contain platform-only code.
+- **[/sharedLogic](./sharedLogic/src)** — Shared business logic. [commonMain](./sharedLogic/src/commonMain/kotlin) contains networking, models, repository logic and Koin DI modules.
+- **[/sharedUI](./sharedUI/src)** — Shared Compose UI. [commonMain](./sharedUI/src/commonMain/kotlin) contains common UI for all targets and ViewModel DI modules.
 
 ## Running Tests
 
