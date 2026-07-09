@@ -1,6 +1,6 @@
 # NewsKMP 📰
 
-A modern News application built with **Kotlin Multiplatform (KMP)** targeting Android and iOS. Fetches real-time top stories from the **New York Times API** with section-based browsing and article detail view.
+A modern News application built with **Kotlin Multiplatform (KMP)** targeting Android and iOS. Fetches real-time top stories from the **New York Times API** with section-based browsing, local caching using **SQLDelight**, and article detail view.
 
 ## Features
 
@@ -10,6 +10,8 @@ A modern News application built with **Kotlin Multiplatform (KMP)** targeting An
 - 📄 Article detail screen with full image and abstract
 - 🔗 Open full article in browser
 - ⚡ Section-based caching — no repeated API calls
+- 💾 Local article storage with SQLDelight
+- 📡 Cached articles are shown when the network request fails
 - 🔄 Pull to retry on error
 - 📭 Empty state handling per section
 
@@ -22,6 +24,7 @@ A modern News application built with **Kotlin Multiplatform (KMP)** targeting An
 | Shared Logic | Kotlin Multiplatform (KMP) |
 | Networking | Ktor Client |
 | Serialization | Kotlinx Serialization |
+| Local Storage | SQLDelight |
 | Image Loading | Coil 3 |
 | Dependency Injection | Koin |
 | UI — Android | Jetpack Compose |
@@ -34,6 +37,7 @@ NewsKMP/
 ├── sharedLogic/
 │   └── commonMain/
 │       └── data/
+│           ├── database/
 │           ├── model/
 │           ├── remote/
 │           ├── repository/
@@ -64,6 +68,12 @@ ApiService (ApiServiceImpl + Ktor Client)
 ↓
 NYT Top Stories API
 
+Repository (NewsRepositoryImpl)
+↓
+ArticleDao
+↓
+SQLDelight Database
+
 ## Dependency Injection
 
 This project uses **Koin** for dependency injection on Android.
@@ -71,10 +81,11 @@ This project uses **Koin** for dependency injection on Android.
 | Module | Contents |
 |---|---|
 | `networkModule` | `ApiServiceImpl` bound to `ApiService` |
+| `databaseModule` | `ArticleDao` with platform-specific `DatabaseDriverFactory` |
 | `repositoryModule` | `NewsRepositoryImpl` bound to `NewsRepository` |
 | `viewModelModule` | `NewsViewModel`, `AppViewModel` |
 
-Koin is initialized in `NewsApplication.kt` and all modules are registered at app startup. iOS uses manual DI via SwiftUI's native state management.
+Koin is initialized in `NewsApplication.kt` and all modules are registered at app startup. iOS uses manual DI via SwiftUI's native state management and the iOS `DatabaseDriverFactory`.
 
 ## Getting Started
 
@@ -126,6 +137,12 @@ Build the shared framework first:
 ./gradlew :sharedLogic:linkDebugFrameworkIosSimulatorArm64
 ```
 
+Make sure the following linker flag is added in the iOS `Config.xcconfig` file:
+
+```properties
+OTHER_LDFLAGS = $(inherited) -lsqlite3
+```
+
 Then open in Xcode:
 
 ```bash
@@ -139,7 +156,7 @@ Select a simulator and click **Run**.
 This is a Kotlin Multiplatform project targeting Android and iOS.
 
 - **[/iosApp](./iosApp/iosApp)** — iOS application entry point with SwiftUI code.
-- **[/sharedLogic](./sharedLogic/src)** — Shared business logic. [commonMain](./sharedLogic/src/commonMain/kotlin) contains networking, models, repository logic and Koin DI modules.
+- **[/sharedLogic](./sharedLogic/src)** — Shared business logic. [commonMain](./sharedLogic/src/commonMain/kotlin) contains networking, models, SQLDelight database access, repository logic and Koin DI modules.
 - **[/sharedUI](./sharedUI/src)** — Shared Compose UI. [commonMain](./sharedUI/src/commonMain/kotlin) contains common UI for all targets and ViewModel DI modules.
 
 ## Running Tests
