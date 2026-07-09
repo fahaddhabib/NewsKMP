@@ -1,0 +1,32 @@
+CREATE TABLE ArticleEntity (
+url TEXT NOT NULL PRIMARY KEY,
+title TEXT NOT NULL,
+abstract TEXT NOT NULL,
+byline TEXT NOT NULL,
+section TEXT NOT NULL,
+subsection TEXT NOT NULL,
+published_date TEXT NOT NULL,
+kicker TEXT NOT NULL,
+thumbnail_url TEXT,
+large_image_url TEXT,
+item_type TEXT NOT NULL
+);
+
+insertArticle:
+INSERT OR REPLACE INTO ArticleEntity(
+url, title, abstract, byline, section,
+subsection, published_date, kicker,
+thumbnail_url, large_image_url, item_type
+) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+selectAllArticles:
+SELECT * FROM ArticleEntity;
+
+selectArticlesBySection:
+SELECT * FROM ArticleEntity WHERE section = ?;
+
+deleteAllArticles:
+DELETE FROM ArticleEntity;
+
+deleteArticlesBySection:
+DELETE FROM ArticleEntity WHERE section = ?;
